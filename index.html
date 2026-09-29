@@ -10,6 +10,7 @@ html,body{height:100%}
 body{font-family:"Songti SC","STSong","PingFang SC",serif;background:#151a33;color:#fdf6e3;overflow:hidden;user-select:none;-webkit-user-select:none}
 #book{position:relative;height:100%;max-width:520px;margin:0 auto;display:flex;flex-direction:column;background:#1d2340}
 #scene{position:relative;flex:1;overflow:hidden;transition:background 1.2s}
+#side{background:#fdf6e3}
 .scene{background:linear-gradient(#2b3157,#474f78)}
 .scene.rainy{background:linear-gradient(#222742,#3a4063)}
 .scene.clear{background:linear-gradient(#1f2750,#3b4a80)}
@@ -23,6 +24,7 @@ body{font-family:"Songti SC","STSong","PingFang SC",serif;background:#151a33;col
 .cloud::after{width:84px;height:84px;top:-44px;left:56px}
 .cloud.dark{background:#6f7897}
 .cloud.drift{animation:drift 9s ease-in-out infinite alternate}
+.cloud.c{cursor:pointer}
 @keyframes drift{to{transform:translateX(24px)}}
 .moon{position:absolute;left:50%;top:26%;width:130px;height:130px;margin-left:-65px;border-radius:50%;background:radial-gradient(circle at 38% 36%,#fffbe6,#ffe7a3 55%,#f5c96a);transition:box-shadow 2s,opacity 2s}
 .moon.dim{opacity:.25}
@@ -44,25 +46,41 @@ body{font-family:"Songti SC","STSong","PingFang SC",serif;background:#151a33;col
 @keyframes tw{to{opacity:.25}}
 .title{position:absolute;left:0;right:0;top:58%;text-align:center;font-size:36px;letter-spacing:6px;color:#ffe9b0;text-shadow:0 2px 10px rgba(0,0,0,.4)}
 .sub{position:absolute;left:0;right:0;top:calc(58% + 56px);text-align:center;font-size:15px;opacity:.75;letter-spacing:2px}
-#text{min-height:132px;padding:18px 22px 8px;font-size:18px;line-height:1.75;background:#fdf6e3;color:#3a3350;white-space:pre-line}
+#text{min-height:132px;padding:18px 22px 8px;font-size:18px;line-height:1.75;color:#3a3350;white-space:pre-line}
 .hint{color:#9a8fb5;font-size:15px}
-#nav{display:flex;align-items:center;justify-content:space-between;padding:10px 18px 18px;background:#fdf6e3}
-#nav button{border:0;background:#3d4670;color:#fdf6e3;font:inherit;font-size:15px;padding:9px 16px;border-radius:20px}
-#nav button:disabled{opacity:.25}
+#nav{display:flex;align-items:center;justify-content:space-between;padding:10px 18px 18px}
+#nav button{border:0;background:#3d4670;color:#fdf6e3;font:inherit;font-size:15px;padding:9px 16px;border-radius:20px;cursor:pointer}
+#nav button:disabled{opacity:.25;cursor:default}
 #dots{display:flex;gap:6px}
 #dots b{width:7px;height:7px;border-radius:50%;background:#cfc6e0}
 #dots b.on{background:#3d4670}
 .end{color:#b09a6a;text-align:center;display:block;margin-top:6px;letter-spacing:4px}
+/* 电脑 / 横屏：左图右文，像摊开的一本书 */
+@media (min-width:760px) and (min-aspect-ratio:1/1){
+  body{display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 30% 20%,#2a3160,#0d1126 75%)}
+  #book{flex-direction:row;width:min(1080px,94vw);height:min(640px,88vh);max-width:none;margin:0;border-radius:22px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.55)}
+  #scene{flex:1.6}
+  #side{flex:1;display:flex;flex-direction:column;box-shadow:inset 14px 0 18px -14px rgba(0,0,0,.35)}
+  #text{flex:1;display:flex;flex-direction:column;justify-content:center;padding:40px 38px;font-size:21px;line-height:1.95}
+  .hint{font-size:16px;margin-top:6px}
+  #nav{padding:18px 30px 28px}
+  #nav button{font-size:16px;padding:10px 20px}
+  .title{font-size:46px}
+  .sub{font-size:17px;top:calc(58% + 66px)}
+  .bubble{left:14%;right:14%;font-size:19px}
+}
 </style>
 </head>
 <body>
 <div id="book">
   <div id="scene" class="scene"></div>
-  <div id="text"></div>
-  <div id="nav">
-    <button id="prev">← 上一页</button>
-    <div id="dots"></div>
-    <button id="next">下一页 →</button>
+  <div id="side">
+    <div id="text"></div>
+    <div id="nav">
+      <button id="prev">← 上一页</button>
+      <div id="dots"></div>
+      <button id="next">下一页 →</button>
+    </div>
   </div>
 </div>
 <script>
@@ -80,9 +98,9 @@ let idx=Math.min(+(localStorage.getItem('moon_page')||0),pages.length-1)||0;
 const $=s=>document.querySelector(s);
 const scene=$('#scene'),text=$('#text');
 
-function rain(){let h='';for(let i=0;i<46;i++)h+=`<i style="left:${Math.random()*115}%;animation-delay:${(-Math.random()*1.2).toFixed(2)}s;animation-duration:${(.55+Math.random()*.45).toFixed(2)}s"></i>`;return `<div class="rain">${h}</div>`}
+function rain(){let h='';for(let i=0;i<60;i++)h+=`<i style="left:${Math.random()*115}%;animation-delay:${(-Math.random()*1.2).toFixed(2)}s;animation-duration:${(.55+Math.random()*.45).toFixed(2)}s"></i>`;return `<div class="rain">${h}</div>`}
 function sky(dark){const c=dark?' dark':'';return `<div class="cloud drift${c}" style="left:-30px;top:8%"></div><div class="cloud drift${c}" style="right:-40px;top:4%;animation-delay:-3s"></div><div class="cloud drift${c}" style="left:30%;top:1%;transform:scale(.8);animation-delay:-5s"></div>`}
-function stars(){let h='';for(let i=0;i<30;i++)h+=`<span class="star" style="left:${Math.random()*100}%;top:${Math.random()*55}%;animation-delay:${(-Math.random()*2.5).toFixed(2)}s"></span>`;return h}
+function stars(){let h='';for(let i=0;i<40;i++)h+=`<span class="star" style="left:${Math.random()*100}%;top:${Math.random()*55}%;animation-delay:${(-Math.random()*2.5).toFixed(2)}s"></span>`;return h}
 
 function render(){
   const p=pages[idx];
@@ -119,11 +137,12 @@ function render(){
   if(who){who.onclick=()=>{const b=$('#bubble');b.textContent=p.ans;b.classList.add('show');who.classList.add('said');text.innerHTML=p.text+'\n<span class="hint">嗯……好像不太对？</span>'}}
   if(p.type==='end'){
     let left=4;
-    document.querySelectorAll('.cloud.c').forEach((c,i)=>{
+    document.querySelectorAll('.cloud.c').forEach(c=>{
       c.onclick=()=>{
         if(c.dataset.gone)return;c.dataset.gone=1;
-        const dir=(c.getBoundingClientRect().left+75<innerWidth/2)?-1:1;
-        c.style.transform=`translateX(${dir*420}px)`;c.style.opacity='0';
+        const sr=scene.getBoundingClientRect(),cr=c.getBoundingClientRect();
+        const dir=(cr.left+cr.width/2<sr.left+sr.width/2)?-1:1;
+        c.style.transform=`translateX(${dir*(sr.width*0.8+150)}px)`;c.style.opacity='0';
         if(--left===0){
           $('#moon').classList.add('glow');scene.classList.add('clearsky');
           text.innerHTML='云慢慢散开了——\n月亮一直都在那儿，圆圆的，亮亮的。\n原来看不见的时候，它也还在。<span class="end">— 完 —</span>';
@@ -137,6 +156,7 @@ function render(){
 }
 $('#prev').onclick=()=>{if(idx>0){idx--;render()}};
 $('#next').onclick=()=>{idx=idx===pages.length-1?0:idx+1;render()};
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'){$('#next').click()}else if(e.key==='ArrowLeft'){$('#prev').click()}});
 render();
 </script>
 </body>
