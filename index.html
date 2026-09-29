@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>月亮去哪儿了</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:"Songti SC","STSong","PingFang SC",serif;background:#151a33;color:#fdf6e3;overflow:hidden;user-select:none;-webkit-user-select:none}
+#book{position:relative;height:100%;max-width:520px;margin:0 auto;display:flex;flex-direction:column;background:#1d2340}
+#scene{position:relative;flex:1;overflow:hidden;transition:background 1.2s}
+.scene{background:linear-gradient(#2b3157,#474f78)}
+.scene.rainy{background:linear-gradient(#222742,#3a4063)}
+.scene.clear{background:linear-gradient(#1f2750,#3b4a80)}
+.scene.night{background:radial-gradient(circle at 50% 32%,#34407a 0%,#141a38 70%)}
+.rain{position:absolute;inset:0;pointer-events:none}
+.rain i{position:absolute;top:-20%;width:2px;height:22px;background:linear-gradient(transparent,rgba(200,215,255,.7));border-radius:2px;animation:fall linear infinite}
+@keyframes fall{to{transform:translate(-30px,140vh)}}
+.cloud{position:absolute;width:150px;height:52px;background:#aeb6cf;border-radius:52px;opacity:.95;transition:transform 1.4s ease,opacity 1.4s ease}
+.cloud::before,.cloud::after{content:"";position:absolute;background:inherit;border-radius:50%}
+.cloud::before{width:64px;height:64px;top:-30px;left:22px}
+.cloud::after{width:84px;height:84px;top:-44px;left:56px}
+.cloud.dark{background:#6f7897}
+.cloud.drift{animation:drift 9s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translateX(24px)}}
+.moon{position:absolute;left:50%;top:26%;width:130px;height:130px;margin-left:-65px;border-radius:50%;background:radial-gradient(circle at 38% 36%,#fffbe6,#ffe7a3 55%,#f5c96a);transition:box-shadow 2s,opacity 2s}
+.moon.dim{opacity:.25}
+.moon.glow{box-shadow:0 0 60px 20px rgba(255,230,150,.45),0 0 160px 60px rgba(255,220,130,.18)}
+.window{position:absolute;left:50%;top:14%;width:200px;height:160px;margin-left:-100px;border:8px solid #8a6a4a;border-radius:6px;background:rgba(20,25,50,.35)}
+.window::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:6px;margin-left:-3px;background:#8a6a4a}
+.window::after{content:"";position:absolute;top:50%;left:0;right:0;height:6px;margin-top:-3px;background:#8a6a4a}
+.char{position:absolute;left:50%;bottom:8%;font-size:96px;transform:translateX(-50%);transition:transform .25s}
+.char.tap{cursor:pointer;animation:bob 1.6s ease-in-out infinite}
+@keyframes bob{50%{transform:translateX(-50%) translateY(-8px)}}
+.char.said{animation:none}
+.small{position:absolute;bottom:8%;font-size:56px}
+.stool{position:absolute;left:50%;bottom:5%;width:90px;height:14px;margin-left:-45px;background:#8a6a4a;border-radius:4px}
+.bubble{position:absolute;left:8%;right:8%;top:6%;background:#fdf6e3;color:#3a3350;border-radius:18px;padding:14px 16px;font-size:17px;line-height:1.6;opacity:0;transform:translateY(8px);transition:all .4s}
+.bubble.show{opacity:1;transform:none}
+.bubble::after{content:"";position:absolute;left:50%;bottom:-12px;border:12px solid transparent;border-top-color:#fdf6e3;border-bottom:0;margin-left:-12px}
+.star{position:absolute;width:3px;height:3px;background:#fff;border-radius:50%;opacity:0;transition:opacity 2s}
+.night.clearsky .star{opacity:.8;animation:tw 2.5s ease-in-out infinite alternate}
+@keyframes tw{to{opacity:.25}}
+.title{position:absolute;left:0;right:0;top:58%;text-align:center;font-size:36px;letter-spacing:6px;color:#ffe9b0;text-shadow:0 2px 10px rgba(0,0,0,.4)}
+.sub{position:absolute;left:0;right:0;top:calc(58% + 56px);text-align:center;font-size:15px;opacity:.75;letter-spacing:2px}
+#text{min-height:132px;padding:18px 22px 8px;font-size:18px;line-height:1.75;background:#fdf6e3;color:#3a3350;white-space:pre-line}
+.hint{color:#9a8fb5;font-size:15px}
+#nav{display:flex;align-items:center;justify-content:space-between;padding:10px 18px 18px;background:#fdf6e3}
+#nav button{border:0;background:#3d4670;color:#fdf6e3;font:inherit;font-size:15px;padding:9px 16px;border-radius:20px}
+#nav button:disabled{opacity:.25}
+#dots{display:flex;gap:6px}
+#dots b{width:7px;height:7px;border-radius:50%;background:#cfc6e0}
+#dots b.on{background:#3d4670}
+.end{color:#b09a6a;text-align:center;display:block;margin-top:6px;letter-spacing:4px}
+</style>
+</head>
+<body>
+<div id="book">
+  <div id="scene" class="scene"></div>
+  <div id="text"></div>
+  <div id="nav">
+    <button id="prev">← 上一页</button>
+    <div id="dots"></div>
+    <button id="next">下一页 →</button>
+  </div>
+</div>
+<script>
+const pages=[
+  {type:'cover'},
+  {rain:true,scene:'wait',text:'八月十五的晚上，阿圆搬了个小板凳，坐在窗边等月亮。\n可是雨一直下，一直下。'},
+  {rain:true,char:'👵',text:'阿圆跑去问奶奶：“月亮去哪儿了？”',ans:'“月亮也回老家过节啦，\n它也要跟家里人团圆的呀。”'},
+  {rain:true,char:'👨',text:'阿圆又跑去问爸爸：“月亮去哪儿了？”',ans:'“被云朵借走当灯笼啦，\n明天就还回来。”'},
+  {rain:true,char:'👩',text:'阿圆去问妈妈：“月亮去哪儿了？”',ans:'“月亮淋了雨，\n钻进被窝里睡觉啦。”'},
+  {rain:true,char:'👴',text:'阿圆最后去问爷爷：“月亮去哪儿了？”',ans:'爷爷没说话，掰了半块月饼给她：\n“喏，这不就在这儿。”'},
+  {rain:false,scene:'think',text:'每个人说的都不一样。\n雨停了，阿圆趴在窗台上，想啊想……\n她决定自己去找月亮。'},
+  {type:'end'}
+];
+let idx=Math.min(+(localStorage.getItem('moon_page')||0),pages.length-1)||0;
+const $=s=>document.querySelector(s);
+const scene=$('#scene'),text=$('#text');
+
+function rain(){let h='';for(let i=0;i<46;i++)h+=`<i style="left:${Math.random()*115}%;animation-delay:${(-Math.random()*1.2).toFixed(2)}s;animation-duration:${(.55+Math.random()*.45).toFixed(2)}s"></i>`;return `<div class="rain">${h}</div>`}
+function sky(dark){const c=dark?' dark':'';return `<div class="cloud drift${c}" style="left:-30px;top:8%"></div><div class="cloud drift${c}" style="right:-40px;top:4%;animation-delay:-3s"></div><div class="cloud drift${c}" style="left:30%;top:1%;transform:scale(.8);animation-delay:-5s"></div>`}
+function stars(){let h='';for(let i=0;i<30;i++)h+=`<span class="star" style="left:${Math.random()*100}%;top:${Math.random()*55}%;animation-delay:${(-Math.random()*2.5).toFixed(2)}s"></span>`;return h}
+
+function render(){
+  const p=pages[idx];
+  localStorage.setItem('moon_page',idx);
+  let cls='scene'+(p.rain?' rainy':'');
+  let h='';
+  if(p.type==='cover'){
+    h=`<div class="moon dim"></div>${sky(false)}${rain()}<div class="title">月亮去哪儿了</div><div class="sub">一个中秋下雨夜的故事</div>`;
+    text.innerHTML='八月十五，下了一整夜的雨。\n<span class="hint">点「下一页」开始 →</span>';
+  }else if(p.type==='end'){
+    cls='scene night';
+    h=stars()+`<div class="moon" id="moon"></div>`+
+      `<div class="cloud c" style="left:calc(50% - 150px);top:24%"></div>`+
+      `<div class="cloud c" style="left:calc(50% - 10px);top:27%"></div>`+
+      `<div class="cloud c" style="left:calc(50% - 90px);top:37%"></div>`+
+      `<div class="cloud c" style="left:calc(50% - 60px);top:18%;transform:scale(.85)"></div>`+
+      `<div class="small" style="left:50%;transform:translateX(-50%)">👧</div>`;
+    text.innerHTML='阿圆推开窗，云还挡在那儿。\n<span class="hint">把云朵一朵一朵拨开吧 ☁️</span>';
+  }else{
+    if(p.scene==='wait'){
+      h=sky(true)+rain()+`<div class="window"></div><div class="stool"></div><div class="char" style="bottom:7%">👧</div>`;
+    }else if(p.scene==='think'){
+      cls='scene clear';
+      h=sky(false)+`<div class="window"></div><div class="char">👧</div>`;
+    }else{
+      h=sky(true)+rain()+`<div class="bubble" id="bubble"></div><div class="small" style="left:12%">👧</div><div class="char tap" id="who">${p.char}</div>`;
+    }
+    text.innerHTML=p.text+(p.ans?'\n<span class="hint">点点TA，听听怎么说</span>':'');
+  }
+  scene.className=cls;
+  scene.innerHTML=h;
+
+  const who=$('#who');
+  if(who){who.onclick=()=>{const b=$('#bubble');b.textContent=p.ans;b.classList.add('show');who.classList.add('said');text.innerHTML=p.text+'\n<span class="hint">嗯……好像不太对？</span>'}}
+  if(p.type==='end'){
+    let left=4;
+    document.querySelectorAll('.cloud.c').forEach((c,i)=>{
+      c.onclick=()=>{
+        if(c.dataset.gone)return;c.dataset.gone=1;
+        const dir=(c.getBoundingClientRect().left+75<innerWidth/2)?-1:1;
+        c.style.transform=`translateX(${dir*420}px)`;c.style.opacity='0';
+        if(--left===0){
+          $('#moon').classList.add('glow');scene.classList.add('clearsky');
+          text.innerHTML='云慢慢散开了——\n月亮一直都在那儿，圆圆的，亮亮的。\n原来看不见的时候，它也还在。<span class="end">— 完 —</span>';
+        }
+      };
+    });
+  }
+  $('#prev').disabled=idx===0;
+  $('#next').textContent=idx===pages.length-1?'再读一遍 ↺':'下一页 →';
+  $('#dots').innerHTML=pages.map((_,i)=>`<b class="${i===idx?'on':''}"></b>`).join('');
+}
+$('#prev').onclick=()=>{if(idx>0){idx--;render()}};
+$('#next').onclick=()=>{idx=idx===pages.length-1?0:idx+1;render()};
+render();
+</script>
+</body>
+</html>
